@@ -20,13 +20,12 @@ jobs:
         java-version: '21'
     - name: Build with Gradle
       run: |
-          git clone https://github.com/FMAC-Team/nekosu.git
+          git clone https://github.com/FMAC-Team/nekosu.git -b test
           cd nekosu/app
           echo "BUILD_TIME=$(TZ=Asia/Shanghai date "+%Y%m%d%H%M")" >> $GITHUB_ENV
           {
             echo 'org.gradle.parallel=true'
             echo 'org.gradle.vfs.watch=true'
-            echo 'org.gradle.jvmargs=-Xmx2048m'
             echo 'android.native.buildOutput=verbose'
           } >> gradle.properties
           sed -i 's/org.gradle.configuration-cache=true//g' gradle.properties
