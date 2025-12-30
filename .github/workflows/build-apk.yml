@@ -83,8 +83,8 @@ jobs:
           cd nekosu/app
           mkdir -p app/src/main/cpp/third_party/openssl/arm64-v8a
           mkdir -p app/src/main/cpp/third_party/openssl/x86_64
-          cp -r ../../openssl-prebuilt/include app/src/main/cpp/third_party/openssl/
-          cp ../../openssl-prebuilt/lib/*.a app/src/main/cpp/third_party/openssl/arm64-v8a/
+          cp -r ../../openssl-arm64/include app/src/main/cpp/third_party/openssl/
+          cp ../../openssl-arm64/lib/*.a app/src/main/cpp/third_party/openssl/arm64-v8a/
           cp ../../openssl-x86_64/lib/*.a app/src/main/cpp/third_party/openssl/x86_64/
           echo "BUILD_TIME=$(TZ=Asia/Shanghai date "+%Y%m%d%H%M")" >> $GITHUB_ENV
           {
@@ -133,8 +133,8 @@ jobs:
           cd nekosu/app
           mkdir -p app/src/main/cpp/third_party/openssl/arm64-v8a
           mkdir -p app/src/main/cpp/third_party/openssl/x86_64
-          cp -r ../../openssl-prebuilt/include app/src/main/cpp/third_party/openssl/
-          cp ../../openssl-prebuilt/lib/*.a app/src/main/cpp/third_party/openssl/arm64-v8a/
+          cp -r ../../openssl-arm64/include app/src/main/cpp/third_party/openssl/
+          cp ../../openssl-arm64/lib/*.a app/src/main/cpp/third_party/openssl/arm64-v8a/
           cp ../../openssl-x86_64/lib/*.a app/src/main/cpp/third_party/openssl/x86_64/
           echo "BUILD_TIME=$(TZ=Asia/Shanghai date "+%Y%m%d%H%M")" >> $GITHUB_ENV
           {
