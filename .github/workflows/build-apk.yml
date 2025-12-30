@@ -71,13 +71,6 @@ jobs:
           name: openssl-libs-x86_64
           path: openssl-x86_64
 
-      - name: Prepare Libs for CMake
-        run: |
-          cd nekosu/app
-          # 创建对应的架构目录
-          mkdir -p app/src/main/cpp/third_party/openssl/arm64-v8a
-          mkdir -p app/src/main/cpp/third_party/openssl/x86_64
-
       - name: Set up JDK 21
         uses: actions/setup-java@v4
         with:
@@ -88,6 +81,8 @@ jobs:
         run: |
           git clone https://github.com/FMAC-Team/nekosu.git -b test
           cd nekosu/app
+          mkdir -p app/src/main/cpp/third_party/openssl/arm64-v8a
+          mkdir -p app/src/main/cpp/third_party/openssl/x86_64
           cp -r ../../openssl-prebuilt/include app/src/main/cpp/third_party/openssl/
           cp ../../openssl-prebuilt/lib/*.a app/src/main/cpp/third_party/openssl/arm64-v8a/
           cp ../../openssl-x86_64/lib/*.a app/src/main/cpp/third_party/openssl/x86_64/
@@ -126,13 +121,6 @@ jobs:
           name: openssl-libs-x86_64
           path: openssl-x86_64
 
-      - name: Prepare Libs for CMake
-        run: |
-          cd nekosu/app
-          # 创建对应的架构目录
-          mkdir -p app/src/main/cpp/third_party/openssl/arm64-v8a
-          mkdir -p app/src/main/cpp/third_party/openssl/x86_64
-
       - name: Set up JDK 21
         uses: actions/setup-java@v4
         with:
@@ -143,6 +131,8 @@ jobs:
         run: |
           git clone https://github.com/FMAC-Team/nekosu.git -b test
           cd nekosu/app
+          mkdir -p app/src/main/cpp/third_party/openssl/arm64-v8a
+          mkdir -p app/src/main/cpp/third_party/openssl/x86_64
           cp -r ../../openssl-prebuilt/include app/src/main/cpp/third_party/openssl/
           cp ../../openssl-prebuilt/lib/*.a app/src/main/cpp/third_party/openssl/arm64-v8a/
           cp ../../openssl-x86_64/lib/*.a app/src/main/cpp/third_party/openssl/x86_64/
