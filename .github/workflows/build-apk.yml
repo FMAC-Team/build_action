@@ -9,12 +9,52 @@ env:
   CCACHE_HARDLINK: "true"
 
 jobs:
+    build_openssl:
+    name: Build OpenSSL for Android
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Install build tools
+        run: sudo apt-get update && sudo apt-get install -y build-essential make wget tar
+
+      - name: Download OpenSSL Source
+        run: |
+          wget https://github.com/openssl/openssl/releases/download/openssl-${{ env.OPENSSL_VER }}/openssl-${{ env.OPENSSL_VER }}.tar.gz
+          tar -zxf openssl-${{ env.OPENSSL_VER }}.tar.gz
+
+      - name: Build OpenSSL (arm64-v8a)
+        run: |
+          cd openssl-${{ env.OPENSSL_VER }}
+          # 自动获取 NDK 路径
+          export ANDROID_NDK_ROOT=$ANDROID_NDK_LATEST_HOME
+          export PATH=$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH
+          
+          ./Configure android-arm64 \
+            -D__ANDROID_API__=${{ env.ANDROID_API }} \
+            no-asm no-shared no-tests no-unit-test no-docs \
+            --prefix=$(pwd)/output
+          
+          make -j$(nproc)
+          make install_sw
+
+      - name: Upload OpenSSL Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: openssl-libs
+          path: openssl-${{ env.OPENSSL_VER }}/output/
+
+
   build_debug:
     name: Build Debug APK
+    needs: build_openssl
     runs-on: ubuntu-24.04
     steps:
       - name: Clone repository
         uses: actions/checkout@v4
+      - name: Download OpenSSL Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: openssl-libs
+          path: openssl-prebuilt
 
       - name: Set up JDK 21
         uses: actions/setup-java@v4
@@ -26,6 +66,9 @@ jobs:
         run: |
           git clone https://github.com/FMAC-Team/nekosu.git -b test
           cd nekosu/app
+          mkdir -p app/src/main/cpp/third_party/openssl/arm64-v8a
+          cp -r ../../openssl-prebuilt/include app/src/main/cpp/third_party/openssl/
+          cp ../../openssl-prebuilt/lib/*.a app/src/main/cpp/third_party/openssl/arm64-v8a/
           echo "BUILD_TIME=$(TZ=Asia/Shanghai date "+%Y%m%d%H%M")" >> $GITHUB_ENV
           {
             echo 'org.gradle.parallel=true'
@@ -43,10 +86,17 @@ jobs:
 
   build_release:
     name: Build Release APK
+    needs: build_openssl
     runs-on: ubuntu-24.04
     steps:
       - name: Clone repository
         uses: actions/checkout@v4
+        
+      - name: Download OpenSSL Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: openssl-libs
+          path: openssl-prebuilt
 
       - name: Set up JDK 21
         uses: actions/setup-java@v4
@@ -58,6 +108,9 @@ jobs:
         run: |
           git clone https://github.com/FMAC-Team/nekosu.git -b test
           cd nekosu/app
+          mkdir -p app/src/main/cpp/third_party/openssl/arm64-v8a
+          cp -r ../../openssl-prebuilt/include app/src/main/cpp/third_party/openssl/
+          cp ../../openssl-prebuilt/lib/*.a app/src/main/cpp/third_party/openssl/arm64-v8a/
           echo "BUILD_TIME=$(TZ=Asia/Shanghai date "+%Y%m%d%H%M")" >> $GITHUB_ENV
           {
             echo 'org.gradle.parallel=true'
