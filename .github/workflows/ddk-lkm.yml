@@ -34,7 +34,7 @@ jobs:
 
         echo "=== Building fmac for KMI: ${{ inputs.kmi }} ==="
 
-        CONFIG_KSU=m make
+        CONFIG_FMAC=m make
         
         echo "=== Build completed ==="
 
