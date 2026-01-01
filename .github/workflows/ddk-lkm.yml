@@ -24,7 +24,7 @@ jobs:
     steps:
     - name: Checkout source code
       run: |
-        git clone https://github.com/FMAC-Team/nekosu.git
+        git clone https://github.com/FMAC-Team/nekosu.git -b test
 
     - name: Build fmac.ko
       run: |
