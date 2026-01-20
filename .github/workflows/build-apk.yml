@@ -70,21 +70,28 @@ jobs:
         with:
           name: openssl-libs-x86_64
           path: openssl-x86_64
-          
-      - name: Clone source
-        run: |
-          git clone https://github.com/FMAC-Team/nekosu.git -b test
-          cd nekosu/app
-      
+
       - name: Set up JDK 21
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '21'
-          cache: gradle
+          
+      - name: Cache Gradle packages
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
 
       - name: Build Debug
         run: |
+          git clone https://github.com/FMAC-Team/nekosu.git -b test
+          cd nekosu/app
           mkdir -p app/src/main/cpp/third_party/openssl/arm64-v8a
           mkdir -p app/src/main/cpp/third_party/openssl/x86_64
           cp -r ../../openssl-arm64/include app/src/main/cpp/third_party/openssl/
