@@ -18,7 +18,7 @@ jobs:
       
       - name: Download arm64 Artifacts
         run: |
-         wget -O llvm.zip https://github.com/FMAC-Team/build_action/actions/runs/21583467052/artifacts/5340325663
+         wget -O llvm.zip https://github.com/FMAC-Team/build_action/raw/refs/heads/main/llvm-project.zip
          unzip llvm.zip
 
       - name: setup tools
