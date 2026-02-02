@@ -12,9 +12,11 @@ jobs:
         uses: AutoModality/action-clean@v1
       
       - name: set ndk
-        uses: nttld/setup-ndk@v1
-        with:
-           ndk-version: r26d
+        run: |
+         wget https://dl.google.com/android/repository/android-ndk-r27d-linux.zip
+         unzip android-ndk-r27d-linux.zip
+         mv android-ndk-r27d /opt/android-ndk-r27d
+         
       
       - name: Download arm64 Artifacts
         run: |
@@ -38,7 +40,7 @@ jobs:
           #make -j8
           mkdir android
           cd android
-          cmake -DLLVM_ANDROID_TOOLCHAIN_DIR=$ANDROID_NDK_HOME  -DCMAKE_TOOLCHAIN_FILE=../../cmake/platforms/Android.cmake ../../  -DCMAKE_INSTALL_PREFIX=/root/clang-r450784
+          cmake -DLLVM_ANDROID_TOOLCHAIN_DIR=/opt/android-ndk-r27d/toolchains/llvm/prebuilt/linux-x86_64/bin/  -DCMAKE_TOOLCHAIN_FILE=../../cmake/platforms/Android.cmake ../../  -DCMAKE_INSTALL_PREFIX=/root/clang-r450784
           make aarch64
           make install
 
