@@ -35,6 +35,11 @@ jobs:
       - name: clean
         uses: AutoModality/action-clean@v1
       
+      - name: set ndk
+        uses: nttld/setup-ndk@v1
+         with:
+           ndk-version: r26d
+      
       - name: Download arm64 Artifacts
         uses: actions/download-artifact@v4
         with:
@@ -44,7 +49,8 @@ jobs:
       - name: setup tools
         run: |
           sudo apt update
-          sudo apt install ninja make cmake -y
+          sudo apt install make cmake -y
+          sudo apt install ninja-build
 
       - name: Build
         run: |
