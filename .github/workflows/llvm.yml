@@ -3,30 +3,11 @@ name: Build LLVM
 on:
   workflow_dispatch:
 
+env:
+      ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
+
+
 jobs:
-  clone_llvm:
-    name: sync llvm
-    runs-on: ubuntu-24.04
-    steps:
-      - name: clean
-        uses: AutoModality/action-clean@v1
-      
-      - name: Install build tools
-        run: sudo apt-get update && sudo apt-get install -y git
-
-      - name: Download OpenSSL Source
-        run: |
-          git clone https://android.googlesource.com/toolchain/llvm-project
-          cd llvm-project
-          git checkout 4c603efb0cca074e9238af8b4106c30add4418f6
-
-      - name: Upload OpenSSL Artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: llvm-project
-          path: llvm-project
-
-
   build_llvm:
     name: install build tools
     needs: clone_llvm
@@ -41,10 +22,9 @@ jobs:
            ndk-version: r26d
       
       - name: Download arm64 Artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: llvm-project
-          path: llvm-project
+        run: |
+        wget -O llvm.zip https://github.com/FMAC-Team/build_action/actions/runs/21583467052/artifacts/5340325663
+        unzip llvm.zip
 
       - name: setup tools
         run: |
@@ -57,11 +37,11 @@ jobs:
           cd llvm-project
           mkdir build
           cd build
-          cmake ..
-          make -j8
+      #    cmake ../
+     #     make -j8
           mkdir android
           cd android
-          cmake -DLLVM_ANDROID_TOOLCHAIN_DIR=${{ steps.setup-ndk.outputs.ndk-path }}  -DCMAKE_TOOLCHAIN_FILE=../../cmake/platforms/Android.cmake ../..  -DCMAKE_INSTALL_PREFIX=/root/clang-r450784
+          cmake -DLLVM_ANDROID_TOOLCHAIN_DIR=$ANDROID_NDK_HOME  -DCMAKE_TOOLCHAIN_FILE=../../cmake/platforms/Android.cmake ../../  -DCMAKE_INSTALL_PREFIX=/root/clang-r450784
           make aarch64
           make install
 
