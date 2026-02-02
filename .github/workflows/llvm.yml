@@ -5,7 +5,7 @@ on:
 
 jobs:
   clone_llvm:
-    name: install tools
+    name: sync llvm
     runs-on: ubuntu-24.04
     steps:
       - name: clean
@@ -18,7 +18,7 @@ jobs:
         run: |
           git clone https://android.googlesource.com/toolchain/llvm-project
           cd llvm-project
-          git reset r450784
+          git checkout 4c603efb0cca074e9238af8b4106c30add4418f6
 
       - name: Upload OpenSSL Artifacts
         uses: actions/upload-artifact@v4
@@ -51,11 +51,18 @@ jobs:
           cd llvm-project
           mkdir build
           cd build
-          cmake -G "Ninja" -DLLVM_ENABLE_PROJECTS="clang;clang-tools-extra;compiler-rt" ../llvm
+          cmake -S llvm -B build -G Ninja \
+          -DCMAKE_BUILD_TYPE=Release \
+          -DBUILD_SHARED_LIBS=OFF \
+          -DLLVM_ENABLE_PROJECTS="clang;lld;compiler-rt" \
+          -DLLVM_TARGETS_TO_BUILD="AArch64;ARM"\
+          -DLLVM_INCLUDE_TESTS=OFF \
+          -DCMAKE_INSTALL_PREFIX=/root/clang-r450784
           ninja
+          ninja install
 
       - name: Upload Debug Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: output
-          path: llvm-project
+          name: clang-r450784
+          path: /root/clang-r450784
