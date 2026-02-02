@@ -53,7 +53,6 @@ jobs:
           sudo apt install ninja-build
 
       - name: Build
-        env: ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
         run: |
           cd llvm-project
           mkdir build
@@ -62,7 +61,7 @@ jobs:
           make -j8
           mkdir android
           cd android
-          cmake -DLLVM_ANDROID_TOOLCHAIN_DIR=$ANDROID_NDK_HOME  -DCMAKE_TOOLCHAIN_FILE=../../cmake/platforms/Android.cmake ../..  -DCMAKE_INSTALL_PREFIX=/root/clang-r450784
+          cmake -DLLVM_ANDROID_TOOLCHAIN_DIR=${{ steps.setup-ndk.outputs.ndk-path }}  -DCMAKE_TOOLCHAIN_FILE=../../cmake/platforms/Android.cmake ../..  -DCMAKE_INSTALL_PREFIX=/root/clang-r450784
           make aarch64
           make install
 
