@@ -1,4 +1,4 @@
-name: Build manager
+name: Build LLVM
 
 on:
   workflow_dispatch:
@@ -8,10 +8,8 @@ jobs:
     name: install tools
     runs-on: ubuntu-24.04
     steps:
-    
       - name: clean
       - uses: AutoModality/action-clean@v1
-      - uses: actions/checkout@v2
       
       - name: Install build tools
         run: sudo apt-get update && sudo apt-get install -y git
@@ -36,9 +34,7 @@ jobs:
     steps:
       - name: clean
       - uses: AutoModality/action-clean@v1
-      - uses: actions/checkout@v2
       
-
       - name: Download arm64 Artifacts
         uses: actions/download-artifact@v4
         with:
