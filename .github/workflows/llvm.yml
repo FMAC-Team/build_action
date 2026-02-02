@@ -3,10 +3,6 @@ name: Build LLVM
 on:
   workflow_dispatch:
 
-env:
-      ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
-
-
 jobs:
   build_llvm:
     name: install build tools
@@ -33,6 +29,8 @@ jobs:
           sudo apt install ninja-build
           
       - name: Build
+        env:
+            ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
         run: |
           cd llvm-project
           mkdir build
