@@ -20,7 +20,7 @@ jobs:
         run: |
           git clone https://android.googlesource.com/toolchain/llvm-project
           cd llvm-project
-          git checkout r450784e
+          git reset r450784
 
       - name: Upload OpenSSL Artifacts
         uses: actions/upload-artifact@v4
