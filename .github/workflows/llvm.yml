@@ -1,0 +1,58 @@
+name: Build manager
+
+on:
+  workflow_dispatch:
+
+jobs:
+  clone_llvm:
+    name: install tools
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Install build tools
+        run: sudo apt-get update && sudo apt-get install -y git
+
+      - name: Download OpenSSL Source
+        run: |
+          git clone https://android.googlesource.com/toolchain/llvm-project
+          cd llvm-project
+          git checkout r450784e
+
+      - name: Upload OpenSSL Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: llvm-project
+          path: llvm-project
+
+
+  build_llvm:
+    name: install build tools
+    needs: clone_llvm
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Clone repository
+        uses: actions/checkout@v4
+
+      - name: Download arm64 Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: llvm-project
+          path: llvm-project
+
+      - name: setup tools
+        run: |
+          sudo apt update
+          sudo apt install ninja make cmake -y
+
+      - name: Build
+        run: |
+          cd llvm-project
+          mkdir build
+          cd build
+          cmake -G "Ninja" -DLLVM_ENABLE_PROJECTS="clang;clang-tools-extra;compiler-rt" ../llvm
+          ninja
+
+      - name: Upload Debug Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: output
+          path: llvm-project
