@@ -53,19 +53,18 @@ jobs:
           sudo apt install ninja-build
 
       - name: Build
+        env: ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
         run: |
           cd llvm-project
           mkdir build
           cd build
-          cmake -S llvm -B build -G Ninja \
-          -DCMAKE_BUILD_TYPE=Release \
-          -DBUILD_SHARED_LIBS=OFF \
-          -DLLVM_ENABLE_PROJECTS="clang;lld;compiler-rt" \
-          -DLLVM_TARGETS_TO_BUILD="AArch64;ARM"\
-          -DLLVM_INCLUDE_TESTS=OFF \
-          -DCMAKE_INSTALL_PREFIX=/root/clang-r450784
-          ninja
-          ninja install
+          cmake ..
+          make -j8
+          mkdir android
+          cd android
+          cmake -DLLVM_ANDROID_TOOLCHAIN_DIR=$ANDROID_NDK_HOME  -DCMAKE_TOOLCHAIN_FILE=../../cmake/platforms/Android.cmake ../..  -DCMAKE_INSTALL_PREFIX=/root/clang-r450784
+          make aarch64
+          make install
 
       - name: Upload Debug Artifact
         uses: actions/upload-artifact@v4
