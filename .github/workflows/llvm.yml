@@ -6,7 +6,6 @@ on:
 jobs:
   build_llvm:
     name: install build tools
-    needs: clone_llvm
     runs-on: ubuntu-24.04
     steps:
       - name: clean
