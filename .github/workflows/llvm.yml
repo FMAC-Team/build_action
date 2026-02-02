@@ -37,7 +37,7 @@ jobs:
       
       - name: set ndk
         uses: nttld/setup-ndk@v1
-         with:
+        with:
            ndk-version: r26d
       
       - name: Download arm64 Artifacts
