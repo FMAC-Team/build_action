@@ -1,0 +1,111 @@
+name: build gki
+on:
+   workflow_dispatch:
+
+jobs:
+  build:
+    name: Build Kernel by ${{ github.actor }}
+    runs-on: ubuntu-22.04
+    timeout-minutes: 60
+    env:
+      CCACHE_COMPILERCHECK: "%compiler% -dumpmachine; %compiler% -dumpversion"
+      CCACHE_NOHASHDIR: "true"
+      CCACHE_HARDLINK: "true"
+    steps:
+    - uses: actions/checkout@v4
+    - name: Prepare Configuration
+      run: |
+        CONFIG_ENV=$(grep -w "CONFIG_ENV" config.env | head -n 1 | cut -d "=" -f 2)
+        find -name config.env
+        CONFIG_LIST=(
+            KERNEL_IMAGE_NAME
+            ARCH
+            ADD_LOCALVERSION_TO_FILENAME
+            EXTRA_CMDS
+            ENABLE_KERNELSU
+            ADD_KPROBES_CONFIG
+            DISABLE-LTO
+            ADD_OVERLAYFS_CONFIG
+            DISABLE_CC_WERROR
+            APPLY_KSU_PATCH
+            USE_CUSTOM_ANYKERNEL3
+            CUSTOM_ANYKERNEL3_SOURCE
+            CUSTOM_ANYKERNEL3_BRANCH
+            ENABLE_CCACHE
+            REMOVE_UNUSED_PACKAGES
+        )
+
+        for CONFIG in "${CONFIG_LIST[@]}"; do
+            if [[ "$CONFIG" == "EXTRA_CMDS" || "$CONFIG" == "CUSTOM_CMDS" ]]; then
+                echo "$CONFIG=$(grep -w "$CONFIG" "$CONFIG_ENV" | head -n 1 | cut -d ":" -f 2)" >> $GITHUB_ENV
+            else
+                echo "$CONFIG=$(grep -w "$CONFIG" "$CONFIG_ENV" | head -n 1 | cut -d "=" -f 2)" >> $GITHUB_ENV
+            fi
+        done
+
+    - name: Remove unused packages
+      if: env.REMOVE_UNUSED_PACKAGES == 'true'
+      uses: jlumbroso/free-disk-space@main
+      with:
+        tool-cache: true
+        android: false
+        dotnet: true
+        haskell: true
+        large-packages: true
+        docker-images: true
+        swap-storage: false
+
+    - name: Set swap to 10G
+      uses: pierotofy/set-swap-space@master
+      with:
+       swap-size-gb: 20
+
+    - name: Setup build kernel environment
+      run: |
+        echo "BUILD_TIME=$(TZ=Asia/Shanghai date "+%Y%m%d%H%M")" >> $GITHUB_ENV
+        echo "DEVICE=$(echo gki_defconfig | sed 's!vendor/!!;s/_defconfig//;s/_user//;s/-perf//')" >> $GITHUB_ENV
+        sudo apt-get update
+        sudo apt-get install git ccache automake flex lzop bison gperf build-essential zip curl zlib1g-dev g++-multilib libxml2-utils bzip2 libbz2-dev libbz2-1.0 libghc-bzlib-dev squashfs-tools pngcrush schedtool dpkg-dev liblz4-tool make optipng maven libssl-dev pwgen libswitch-perl policycoreutils minicom libxml-sax-base-perl libxml-simple-perl bc libc6-dev-i386 lib32ncurses-dev libx11-dev lib32z-dev libgl1-mesa-dev xsltproc unzip device-tree-compiler python-is-python3 python3 libelf-dev dwarves tree
+        mkdir -p $GITHUB_WORKSPACE/kernel_workspace
+
+    - name: Setup repo
+      run: |
+        sudo curl https://storage.googleapis.com/git-repo-downloads/repo -o /bin/repo
+        sudo chmod +x /bin/repo
+
+    - name: Sync kernel source
+      run: |
+        cd $GITHUB_WORKSPACE/kernel_workspace
+        repo init -u https://android.googlesource.com/kernel/manifest.git -b common-android13-5.15-2025-07 -m default.xml --depth=1
+        repo --trace sync -c --no-clone-bundle --no-tags --fail-fast -j16
+
+    - name: Setup FMAC
+      run: |
+        cd $GITHUB_WORKSPACE/kernel_workspace/common
+        echo "drivers/fmac/src/fmac.ko">>android/gki_aarch64_modules
+        curl -sSL https://raw.githubusercontent.com/FMAC-Team/FMAC/main/scripts/patch.sh | bash -
+
+    - name: Setup ccache
+      if: env.ENABLE_CCACHE == 'true'
+      uses: hendrikmuhs/ccache-action@v1.2
+      with:
+        key: build-kernel-${{ env.DEVICE }}${{ env.LOCALVERSION }}${{ env.UPLOADNAME }}
+        max-size: 2G
+
+    - name: Build kernel
+      run: |
+        cd $GITHUB_WORKSPACE/kernel_workspace/
+        LTO=full CC=clang BUILD_CONFIG=common/build.config.gki.aarch64 build/build.sh
+
+    - name: Upload boot image
+      uses: actions/upload-artifact@v4
+      with:
+        name: boot${{ env.LOCALVERSION }}${{ env.UPLOADNAME }}-${{ env.DEVICE }}-${{ env.BUILD_TIME }}
+        path: kernel_workspace/out/android13-5.15/dist/boot-img.tar.gz
+
+    - name: Upload kernel source
+      uses: actions/upload-artifact@v4
+      with:
+        name: gki_5.15-Android13.tar
+        path: kernel_workspace/gki_5.15-Android13.tar
+
