@@ -13,35 +13,6 @@ jobs:
       CCACHE_HARDLINK: "true"
     steps:
     - uses: actions/checkout@v4
-    - name: Prepare Configuration
-      run: |
-        CONFIG_ENV=$(grep -w "CONFIG_ENV" config.env | head -n 1 | cut -d "=" -f 2)
-        find -name config.env
-        CONFIG_LIST=(
-            KERNEL_IMAGE_NAME
-            ARCH
-            ADD_LOCALVERSION_TO_FILENAME
-            EXTRA_CMDS
-            ENABLE_KERNELSU
-            ADD_KPROBES_CONFIG
-            DISABLE-LTO
-            ADD_OVERLAYFS_CONFIG
-            DISABLE_CC_WERROR
-            APPLY_KSU_PATCH
-            USE_CUSTOM_ANYKERNEL3
-            CUSTOM_ANYKERNEL3_SOURCE
-            CUSTOM_ANYKERNEL3_BRANCH
-            ENABLE_CCACHE
-            REMOVE_UNUSED_PACKAGES
-        )
-
-        for CONFIG in "${CONFIG_LIST[@]}"; do
-            if [[ "$CONFIG" == "EXTRA_CMDS" || "$CONFIG" == "CUSTOM_CMDS" ]]; then
-                echo "$CONFIG=$(grep -w "$CONFIG" "$CONFIG_ENV" | head -n 1 | cut -d ":" -f 2)" >> $GITHUB_ENV
-            else
-                echo "$CONFIG=$(grep -w "$CONFIG" "$CONFIG_ENV" | head -n 1 | cut -d "=" -f 2)" >> $GITHUB_ENV
-            fi
-        done
 
     - name: Remove unused packages
       if: env.REMOVE_UNUSED_PACKAGES == 'true'
@@ -82,7 +53,7 @@ jobs:
     - name: Setup FMAC
       run: |
         cd $GITHUB_WORKSPACE/kernel_workspace/common
-        echo "drivers/fmac/src/fmac.ko">>android/gki_aarch64_modules
+        #echo "drivers/fmac/src/fmac.ko">>android/gki_aarch64_modules
         curl -sSL https://raw.githubusercontent.com/FMAC-Team/FMAC/main/scripts/patch.sh | bash -
 
     - name: Setup ccache
