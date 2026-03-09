@@ -25,10 +25,10 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: libncore
-        path: zig-out/lib/*.so
+        path: zig-0.16.0-dev.2682+02142a54d/zig-out/lib/*.so
 
     - name: Upload exe
       uses: actions/upload-artifact@v4
       with:
         name: ncore
-        path: zig-out/bin/*
+        path: zig-0.16.0-dev.2682+02142a54d/zig-out/bin/*
