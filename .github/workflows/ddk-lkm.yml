@@ -2,6 +2,7 @@ name: Build KernelSU Kernel Module
 
 on:
   workflow_call:
+  push:
     inputs:
       kmi:
         description: 'KMI version'

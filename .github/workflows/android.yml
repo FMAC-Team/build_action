@@ -1,0 +1,34 @@
+name: Android CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: build libncore
+      run: |
+           curl -OL https://ziglang.org/builds/zig-x86_64-linux-0.16.0-dev.2682+02142a54d.tar.xz
+           curl -OL https://ziglang.org/builds/zig-0.16.0-dev.2682+02142a54d.tar.xz
+           tar -xf zig-x86_64-linux-0.16.0-dev.2682+02142a54d.tar.xz
+           tar -xf zig-0.16.0-dev.2682+02142a54d.tar.xz
+           cd zig-0.16.0-dev.2682+02142a54d
+           ../zig-x86_64-linux-0.16.0-dev.2682+02142a54d/zig build -Dtarget=aarch64-linux-android
+    - name: Upload lib
+      uses: actions/upload-artifact@v4
+      with:
+        name: libncore
+        path: zig-out/lib/*.so
+
+    - name: Upload exe
+      uses: actions/upload-artifact@v4
+      with:
+        name: ncore
+        path: zig-out/bin/*
