@@ -30,7 +30,7 @@ jobs:
       run: |
         git config --global --add safe.directory "*"
 
-        cd nekosu/src
+        cd nekosu/
 
         echo "=== Building fmac for KMI: ${{ inputs.kmi }} ==="
 
